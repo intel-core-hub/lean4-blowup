@@ -187,7 +187,7 @@ theorem basePoint_blowupPoint_eq_iff (z z' : blowupSet k) :
         simp [RingHom.mem_ker]
       rw [h'] at hmem
       simp [RingHom.mem_ker] at hmem
-      exact hmem.symm
+      first | exact hmem | exact hmem.symm | linear_combination hmem | linear_combination -hmem
     ext i
     exact hx i
   · intro h
