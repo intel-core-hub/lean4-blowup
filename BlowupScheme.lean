@@ -11,7 +11,7 @@ import BlowupProjective
 ここでは構成と、`B₀` の元としての `x, y`、斉次イデアルの証明を与える。
 -/
 
-open MvPolynomial AlgebraicGeometry
+open MvPolynomial AlgebraicGeometry CategoryTheory
 
 universe u
 
