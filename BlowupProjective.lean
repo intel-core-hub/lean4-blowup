@@ -68,7 +68,7 @@ lemma mem_projZeroSet_iff {d : ℕ} {G : MvPolynomial (Fin 4) k} (hG : IsBihom d
     (P, L) ∈ projZeroSet G ↔ evalPair P v G = 0 := by
   obtain ⟨a, ha⟩ := (mk_eq_mk_iff k _ _ L.rep_nonzero hv).mp ((mk_rep L).trans h.symm)
   have e : L.rep = (a : k) • v := ha.symm.trans (Units.smul_def a v)
-  show evalPair P L.rep G = 0 ↔ _
+  change evalPair P L.rep G = 0 ↔ _
   rw [e]
   exact evalPair_smul_eq_zero_iff hG P v a.ne_zero
 
@@ -83,13 +83,13 @@ lemma evalPair_blowEq (P v : Fin 2 → k) :
 lemma isBihom_blowEq : IsBihom 1 (blowEq k) := by
   intro P v c
   rw [evalPair_blowEq, evalPair_blowEq]
-  show P 0 * (c * v 1) - c * v 0 * P 1 = c ^ 1 * (P 0 * v 1 - v 0 * P 1)
+  change P 0 * (c * v 1) - c * v 0 * P 1 = c ^ 1 * (P 0 * v 1 - v 0 * P 1)
   ring
 
 /-- **ブローアップは `𝔸² × ℙ¹` の射影的な(`(t,u)` に斉次な方程式で切られる)部分集合**。 -/
 theorem blowupSet_eq_projZeroSet : blowupSet k = projZeroSet (blowEq k) := by
   ext ⟨P, L⟩
-  show P 0 * L.rep 1 = L.rep 0 * P 1 ↔ evalPair P L.rep (blowEq k) = 0
+  change P 0 * L.rep 1 = L.rep 0 * P 1 ↔ evalPair P L.rep (blowEq k) = 0
   rw [evalPair_blowEq]
   exact sub_eq_zero.symm
 
@@ -105,12 +105,12 @@ lemma isBihom_X1 : IsBihom 0 (X 1 : MvPolynomial (Fin 4) k) := by
 
 lemma mem_projZeroSet_X0 (P : Fin 2 → k) (L : Projectivization k (Fin 2 → k)) :
     (P, L) ∈ projZeroSet (X 0 : MvPolynomial (Fin 4) k) ↔ P 0 = 0 := by
-  show evalPair P L.rep _ = 0 ↔ _
+  change evalPair P L.rep _ = 0 ↔ _
   rw [evalPair_X0]
 
 lemma mem_projZeroSet_X1 (P : Fin 2 → k) (L : Projectivization k (Fin 2 → k)) :
     (P, L) ∈ projZeroSet (X 1 : MvPolynomial (Fin 4) k) ↔ P 1 = 0 := by
-  show evalPair P L.rep _ = 0 ↔ _
+  change evalPair P L.rep _ = 0 ↔ _
   rw [evalPair_X1]
 
 /-- **例外因子 `E` も射影的**:`E = X ∩ Z(x) ∩ Z(y)`。 -/
@@ -176,7 +176,13 @@ theorem isProjClosed_exceptional : IsProjClosed (exceptional k) := by
     · exact ⟨0, isBihom_X1⟩
   · rw [exceptional_eq_projective, blowupSet_eq_projZeroSet]
     ext z
-    simp [and_assoc]
+    constructor
+    · rintro ⟨h1, h2, h3⟩ G hG
+      simp only [Set.mem_insert_iff, Set.mem_singleton_iff] at hG
+      rcases hG with rfl | rfl | rfl
+      exacts [h1, h2, h3]
+    · intro h
+      exact ⟨h _ (by simp), h _ (by simp), h _ (by simp)⟩
 
 end projective
 
