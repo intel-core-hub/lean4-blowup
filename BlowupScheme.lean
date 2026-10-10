@@ -147,6 +147,82 @@ theorem xyToBlow_injective : Function.Injective (xyToBlow k) := by
     Ideal.Quotient.eq_zero_iff_mem.mp hf
   have := blowSpecialize_blowIdeal k hmem
   rwa [blowSpecialize_comp] at this
+
+/-! ### `B₀ ≅ k[x, y]` -/
+
+lemma pull_mem_bigrading_zero (f : MvPolynomial (Fin 2) k) :
+    MvPolynomial.aeval (![X 0, X 1] : Fin 2 → MvPolynomial (Fin 4) k) f ∈ bigrading k 0 := by
+  induction f using MvPolynomial.induction_on with
+  | C c =>
+    rw [aeval_C]
+    exact (mem_weightedHomogeneousSubmodule _ _ _ _).mpr (isWeightedHomogeneous_C wt _)
+  | add a b ha hb =>
+    rw [map_add]
+    exact Submodule.add_mem _ ha hb
+  | mul_X a i ha =>
+    rw [map_mul, aeval_X]
+    refine SetLike.mul_mem_graded (i := 0) (j := 0) ha ?_
+    fin_cases i
+    · exact (mem_weightedHomogeneousSubmodule _ _ _ _).mpr
+        (isWeightedHomogeneous_X k wt 0 : IsWeightedHomogeneous wt (X 0 : MvPolynomial (Fin 4) k) 0)
+    · exact (mem_weightedHomogeneousSubmodule _ _ _ _).mpr
+        (isWeightedHomogeneous_X k wt 1 : IsWeightedHomogeneous wt (X 1 : MvPolynomial (Fin 4) k) 0)
+
+lemma exists_pull_of_mem_bigrading_zero {p : MvPolynomial (Fin 4) k} (hp : p ∈ bigrading k 0) :
+    ∃ f : MvPolynomial (Fin 2) k,
+      MvPolynomial.aeval (![X 0, X 1] : Fin 2 → MvPolynomial (Fin 4) k) f = p := by
+  have hp' : IsWeightedHomogeneous wt p 0 := (mem_weightedHomogeneousSubmodule _ _ _ _).mp hp
+  refine ⟨∑ d ∈ p.support, monomial (Finsupp.equivFunOnFinite.symm ![d 0, d 1]) (coeff d p), ?_⟩
+  conv_rhs => rw [p.as_sum]
+  rw [map_sum]
+  refine Finset.sum_congr rfl fun d hd => ?_
+  have hw : Finsupp.weight wt d = 0 := hp' (mem_support_iff.mp hd)
+  have hw' : Finsupp.weight wt d = d 2 + d 3 := by
+    simp [Finsupp.weight_apply, Finsupp.sum_fintype, Fin.sum_univ_four, wt]
+  have h2 : d 2 = 0 := by omega
+  have h3 : d 3 = 0 := by omega
+  rw [aeval_monomial, monomial_eq]
+  simp [Finsupp.prod_fintype, Fin.prod_univ_two, Fin.prod_univ_four, h2, h3]
+
+/-- `k[x, y] → B₀`。 -/
+noncomputable def xyToB0 : MvPolynomial (Fin 2) k →+* blowGrading k 0 where
+  toFun f := ⟨xyToBlow k f, GradedQuotient.mem_grading (pull_mem_bigrading_zero k f)⟩
+  map_one' := Subtype.ext (map_one _)
+  map_mul' a b := Subtype.ext (map_mul _ a b)
+  map_zero' := Subtype.ext (map_zero _)
+  map_add' a b := Subtype.ext (map_add _ a b)
+
+/-- **`k[x, y] → B₀` は全単射**。 -/
+theorem xyToB0_bijective : Function.Bijective (xyToB0 k) := by
+  constructor
+  · intro a b h
+    exact xyToBlow_injective k (congrArg Subtype.val h)
+  · rintro ⟨z, hz⟩
+    obtain ⟨p, hp, hpz⟩ := Submodule.mem_map.mp hz
+    obtain ⟨f, hf⟩ := exists_pull_of_mem_bigrading_zero k hp
+    refine ⟨f, Subtype.ext ?_⟩
+    change Ideal.Quotient.mk (blowIdeal k) (MvPolynomial.aeval (![X 0, X 1] : Fin 2 →
+      MvPolynomial (Fin 4) k) f) = z
+    rw [hf]
+    exact hpz
+
+/-- **`B₀ ≃+* k[x, y]`**。 -/
+noncomputable def blowB0Equiv : MvPolynomial (Fin 2) k ≃+* blowGrading k 0 :=
+  RingEquiv.ofBijective (xyToB0 k) (xyToB0_bijective k)
+
+/-- `Spec B₀ ≅ Spec k[x, y]`(`= 𝔸²`)。 -/
+noncomputable def blowBaseIso :
+    Spec (CommRingCat.of (blowGrading k 0)) ≅ Spec (CommRingCat.of (MvPolynomial (Fin 2) k)) :=
+  Scheme.Spec.mapIso (blowB0Equiv k).toCommRingCatIso.op
+
+/-- **ブローアップ射 `Proj B ⟶ Spec k[x, y] = 𝔸²`**。 -/
+noncomputable def blowupToAffine :
+    blowupScheme k ⟶ Spec (CommRingCat.of (MvPolynomial (Fin 2) k)) :=
+  blowupMap k ≫ (blowBaseIso k).hom
+
+instance : IsProper (blowupToAffine k) := by
+  unfold blowupToAffine
+  infer_instance
 end scheme
 
 end Blowup
