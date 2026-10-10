@@ -19,5 +19,5 @@ name = "Lean4"
 
 [[lean_lib]]
 name = "Blowup"
-roots = ["Blowup", "BlowupGeometry", "BlowupProjective", "BlowupStrict", "BlowupClosure", "GradedQuotient"]
+roots = ["Blowup", "BlowupGeometry", "BlowupProjective", "BlowupStrict", "BlowupClosure", "GradedQuotient", "BlowupScheme"]
 
