@@ -65,3 +65,4 @@
 * `BlowupStrict.lean`:strict transform の斉次方程式 `strictEq f`(`(t,u)` について `mult f` 次斉次)。
   チャート `t`・`u` でそれぞれ `f̃`・`f̃'` に一致し、`X ∩ Z(strictEq f)` は各チャートで
   `closure(φ⁻¹(Y∖0))` に一致する(`strictEq_mem_iff_chart_t/u`、`k` 代数閉体)。
+* `BlowupClosure.lean`:二つのチャートの統合。`strict_eq_projClosure`:`k` 代数閉体・`f ≠ 0` で `X ∩ Z(strictEq f) = projClosure (φ⁻¹(Y∖0) ∩ X)`(𝔸² × ℙ¹ での射影的な閉包)。
