@@ -46,7 +46,7 @@ lemma isBihom_of_mem_bigrading {n : ℕ} {g : MvPolynomial (Fin 4) k} (hg : g �
   simp only [Fin.prod_univ_four, Pi.smul_apply, smul_eq_mul]
   simp only [Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.cons_val_two, Matrix.cons_val_three,
     Matrix.head_cons, Matrix.tail_cons]
-  rw [mul_pow, mul_pow, pow_add]
+  try simp only [mul_pow, pow_add]
   ring
 
 /-- 代入 `x ↦ c`, `y ↦ c'`, `t ↦ b T`, `u ↦ −a T`。 -/
@@ -67,7 +67,7 @@ lemma sig_homog (c c' a b : k) (T : MvPolynomial (Fin 4) k) {n : ℕ} {g : MvPol
     Fin.prod_univ_four]
   simp only [Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.cons_val_two, Matrix.cons_val_three,
     Matrix.head_cons, Matrix.tail_cons]
-  rw [mul_pow, mul_pow, pow_add]
+  try simp only [mul_pow, pow_add]
   ring
 
 lemma sub_sig_mem (σ : MvPolynomial (Fin 4) k →ₐ[k] MvPolynomial (Fin 4) k)
