@@ -185,6 +185,7 @@ lemma mem_E2 (𝔭 : ProjectiveSpectrum (blowGrading k)) (c c' : k)
   rw [key, map_add, map_add, map_mul, map_mul, mk_blowEq, add_zero]
   exact add_mem (Ideal.mul_mem_right _ _ hx') (Ideal.mul_mem_left _ _ hy)
 
+set_option maxHeartbeats 1600000 in
 /-- **`x − c`, `y − c'`, `a t + b u` を含む `Proj B` の点は `blowupPoint z` の形**(`(a, b) ≠ 0`)。 -/
 theorem exists_blowupPoint_eq (𝔭 : ProjectiveSpectrum (blowGrading k)) (c c' a b : k)
     (hab : a ≠ 0 ∨ b ≠ 0)
