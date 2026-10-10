@@ -45,13 +45,13 @@ lemma isBihom_of_mem_bigrading {n : ℕ} {g : MvPolynomial (Fin 4) k} (hg : g �
   rw [hn]
   simp only [Fin.prod_univ_four, Pi.smul_apply, smul_eq_mul]
   simp only [Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.cons_val_two, Matrix.cons_val_three,
-    Matrix.head_cons, Matrix.tail_cons, C_neg, neg_pow, mul_pow, pow_add]
+    Matrix.head_cons, Matrix.tail_cons, mul_pow, pow_add]
   ring
 
 /-- 代入 `x ↦ c`, `y ↦ c'`, `t ↦ b T`, `u ↦ −a T`。 -/
 noncomputable def sig (c c' a b : k) (T : MvPolynomial (Fin 4) k) :
     MvPolynomial (Fin 4) k →ₐ[k] MvPolynomial (Fin 4) k :=
-  MvPolynomial.aeval (![C c, C c', C b * T, -(C a * T)] : Fin 4 → MvPolynomial (Fin 4) k)
+  MvPolynomial.aeval (![C c, C c', C b * T, C (-a) * T] : Fin 4 → MvPolynomial (Fin 4) k)
 
 lemma sig_homog (c c' a b : k) (T : MvPolynomial (Fin 4) k) {n : ℕ} {g : MvPolynomial (Fin 4) k}
     (hg : g ∈ bigrading k n) :
@@ -62,10 +62,10 @@ lemma sig_homog (c c' a b : k) (T : MvPolynomial (Fin 4) k) {n : ℕ} {g : MvPol
   refine Finset.sum_congr rfl fun d hd => ?_
   have hn : n = d 2 + d 3 := (hg' (mem_support_iff.mp hd)).symm.trans (weight_wt d)
   rw [hn, monomial_fin4]
-  simp only [sig, map_mul, map_pow, map_neg, aeval_X, aeval_C, algebraMap_eq, C_mul, C_pow, C_neg,
+  simp only [sig, map_mul, map_pow, aeval_X, aeval_C, algebraMap_eq, C_mul, C_pow,
     Fin.prod_univ_four]
   simp only [Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.cons_val_two, Matrix.cons_val_three,
-    Matrix.head_cons, Matrix.tail_cons, C_neg, neg_pow, mul_pow, pow_add]
+    Matrix.head_cons, Matrix.tail_cons, mul_pow, pow_add]
   ring
 
 lemma sub_sig_mem (σ : MvPolynomial (Fin 4) k →ₐ[k] MvPolynomial (Fin 4) k)
@@ -103,7 +103,7 @@ lemma mem_iff_eval (𝔭 : ProjectiveSpectrum (blowGrading k)) (c c' a b : k)
     (hx : mkB k (X 0 - C c) ∈ 𝔭.asHomogeneousIdeal.toIdeal)
     (hy : mkB k (X 1 - C c') ∈ 𝔭.asHomogeneousIdeal.toIdeal)
     (h2 : mkB k (X 2 - C b * T) ∈ 𝔭.asHomogeneousIdeal.toIdeal)
-    (h3 : mkB k (X 3 + C a * T) ∈ 𝔭.asHomogeneousIdeal.toIdeal)
+    (h3 : mkB k (X 3 - C (-a) * T) ∈ 𝔭.asHomogeneousIdeal.toIdeal)
     (hT : mkB k T ∉ 𝔭.asHomogeneousIdeal.toIdeal)
     {n : ℕ} {g : MvPolynomial (Fin 4) k} (hg : g ∈ bigrading k n) :
     mkB k g ∈ 𝔭.asHomogeneousIdeal.toIdeal ↔ MvPolynomial.eval ![c, c', b, -a] g = 0 := by
