@@ -71,3 +71,4 @@
 * `BlowupPoints.lean`:`k` 点の対応。`blowupPoint : blowupSet k → ProjectiveSpectrum B`(`z ↦ homogeneousCore (ker (g ↦ g(P, rep L)))`、素かつ `t` か `u` を含まない)と、その単射性 `blowupPoint_injective`。未着手:像の特徴づけ(`x-c, y-c'` と `t,u` の 1 次式を含む斉次素イデアル全体との一致=全射性)。
   `BlowupPoints.lean` の両立性:`basePoint`(`Proj B` の点を `k[x,y] → B` による素イデアルの引き戻しで `Spec k[x,y]` の点に送る環論的な構造射)について `basePoint_blowupPoint : basePoint (blowupPoint z) = ker (eval P)`。ただし Mathlib の `Proj.toSpecZero` の点での作用そのものとの同一視は未証明。
 * `BlowupIrrelevant.lean`:`irrelevant_eq_span`(`B` の irrelevant ideal は `(t, u)` で生成される)。一般形 `irrelevant_le_span`(`A₀`-代数として `A` を生成する斉次元の集合 `S` について `A₊ ≤ (S)`)。
+* `BlowupSurj.lean`:全射性の主要部分。`exists_blowupPoint_eq`:`x-c`, `y-c'`, `a t + b u`(`(a,b) ≠ 0`)を含む `Proj B` の点は、ある `z ∈ blowupSet k` の `blowupPoint z`(行列式 `c a + b c' = 0` を irrelevant ideal = `(t,u)` から導き、斉次元 `g` について `g ∈ 𝔭 ⇔ g(c,c',b,-a)=0` を代入 `σ` で示す)。
