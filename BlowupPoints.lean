@@ -77,7 +77,7 @@ lemma X1_mem : (X 1 : MvPolynomial (Fin 4) k) ∈ bigrading k 0 :=
 /-- **`z ∈ X` から `Proj B` の点**。 -/
 noncomputable def blowupPoint (z : blowupSet k) : ProjectiveSpectrum (blowGrading k) where
   asHomogeneousIdeal := pointIdeal k z
-  isPrime := (RingHom.ker_isPrime (blowEv k z)).homogeneousCore _
+  isPrime := (RingHom.ker_isPrime (blowEv k z)).homogeneousCore
   not_irrelevant_le := by
     intro hle
     have hmem : ∀ (g : MvPolynomial (Fin 4) k), g ∈ bigrading k 1 →
