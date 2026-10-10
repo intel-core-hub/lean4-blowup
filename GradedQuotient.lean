@@ -38,16 +38,17 @@ noncomputable def phi : A →ₗ[k] ⨁ i, grading ℳ I i :=
 
 lemma phi_coe (i : ℕ) (x : ℳ i) :
     phi ℳ I (x : A) = DirectSum.of (fun j => grading ℳ I j) i (rho ℳ I i x) := by
-  simp only [phi, LinearMap.comp_apply, LinearEquiv.coe_coe, DirectSum.decomposeLinearEquiv_apply,
-    DirectSum.decompose_coe, DirectSum.lof_eq_of, DirectSum.toModule_lof]
-  rw [← DirectSum.lof_eq_of k]
-  rfl
+  have h : DirectSum.decompose ℳ (x : A) = DirectSum.lof k ℕ (fun j => ℳ j) i x := by
+    rw [DirectSum.decompose_coe, DirectSum.lof_eq_of]
+  change DirectSum.toModule k ℕ _ _ (DirectSum.decompose ℳ (x : A)) = _
+  rw [h, DirectSum.toModule_lof]
+  simp [DirectSum.lof_eq_of]
 
 lemma coe_phi (a : A) :
     DirectSum.coeAddMonoidHom (grading ℳ I) (phi ℳ I a) = Ideal.Quotient.mk I a := by
   induction a using DirectSum.Decomposition.inductionOn ℳ with
   | zero => simp
-  | homogeneous i x =>
+  | @homogeneous i x =>
     rw [phi_coe, DirectSum.coeAddMonoidHom_of]
     rfl
   | add a b ha hb => rw [map_add, map_add, ha, hb, map_add]
@@ -56,6 +57,7 @@ variable {ℳ I}
 
 lemma phi_eq_zero (hI : ∀ (i : ℕ) (r : A), r ∈ I → (DirectSum.decompose ℳ r i : A) ∈ I) {p : A}
     (hp : p ∈ I) : phi ℳ I p = 0 := by
+  classical
   rw [← DirectSum.sum_support_decompose ℳ p, map_sum]
   refine Finset.sum_eq_zero fun i _ => ?_
   have h0 : rho ℳ I i (DirectSum.decompose ℳ p i) = 0 := by
@@ -76,7 +78,7 @@ noncomputable def phiQ (hI : ∀ (i : ℕ) (r : A), r ∈ I → (DirectSum.decom
 lemma phiQ_mk (hI : ∀ (i : ℕ) (r : A), r ∈ I → (DirectSum.decompose ℳ r i : A) ∈ I) (a : A) :
     phiQ hI (Ideal.Quotient.mk I a) = phi ℳ I a := by
   unfold phiQ
-  exact AddMonoidHom.liftOfSurjective_comp_apply _ _ _ a
+  exact AddMonoidHom.liftOfRightInverse_comp_apply _ _ _ _ a
 
 instance gradedMonoid : SetLike.GradedMonoid (grading ℳ I) where
   one_mem := mem_grading (SetLike.GradedOne.one_mem) |> fun h => by simpa using h
