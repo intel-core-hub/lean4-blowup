@@ -40,7 +40,8 @@ lemma blowEq_mem_bigrading : blowEq k ∈ bigrading k 1 := by
   have h2 := (isWeightedHomogeneous_X k wt 2).mul (isWeightedHomogeneous_X k wt 1)
   rw [h03] at h1
   rw [h21] at h2
-  exact (mem_weightedHomogeneousSubmodule _ _ _ _).mpr (h1.sub h2)
+  exact Submodule.sub_mem _ ((mem_weightedHomogeneousSubmodule _ _ _ _).mpr h1)
+    ((mem_weightedHomogeneousSubmodule _ _ _ _).mpr h2)
 
 lemma blowIdeal_homogeneous (i : ℕ) (r : MvPolynomial (Fin 4) k) (hr : r ∈ blowIdeal k) :
     (DirectSum.decompose (bigrading k) r i : MvPolynomial (Fin 4) k) ∈ blowIdeal k := by
