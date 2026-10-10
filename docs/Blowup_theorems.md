@@ -55,5 +55,8 @@
   「原点での重複度が 1 以下になるまでの回数」。
 * 幾何的な主張(`X ⊂ 𝔸² × ℙ¹`)は `Blowup.lean` 後半の集合論的モデルで別に与えており、
   上の代数的な定理とは `σ` を介して対応する形になっている(接続の厳密化は次の課題)。
-* **ビルド未確認**:この環境(RAM 8GB、空きがほぼゼロ)では `import Mathlib` だけで
-  30分以上かかり検証できていない。`lakefile.toml` への登録のみ済み。
+* **ビルド**:手元(RAM 8GB)では `import Mathlib` だけで極端に遅いので、検証は GitHub Actions の
+  `lake build` で行っている(`Blowup`・`BlowupGeometry` とも成功)。
+* **ファイル構成**:`Blowup.lean`(多項式・`binom_resolution`・`theoremA`)と、
+  それを `import` する `BlowupGeometry.lean`(集合論的モデル `X ⊂ 𝔸² × ℙ¹`、全単射・稠密性・既約性・
+  strict transform = 閉包・接線の重複度の総和)。
