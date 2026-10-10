@@ -66,3 +66,5 @@
   チャート `t`・`u` でそれぞれ `f̃`・`f̃'` に一致し、`X ∩ Z(strictEq f)` は各チャートで
   `closure(φ⁻¹(Y∖0))` に一致する(`strictEq_mem_iff_chart_t/u`、`k` 代数閉体)。
 * `BlowupClosure.lean`:二つのチャートの統合。`strict_eq_projClosure`:`k` 代数閉体・`f ≠ 0` で `X ∩ Z(strictEq f) = projClosure (φ⁻¹(Y∖0) ∩ X)`(𝔸² × ℙ¹ での射影的な閉包)。
+* `GradedQuotient.lean`:斉次イデアルによる商は次数付き環(Mathlib に未収録の一般的な構成)。
+* `BlowupScheme.lean`:`Scheme` としてのブローアップ `blowupScheme k = Proj (k[x,y,t,u]/(xu-ty))`(`(t,u)` に重み 1)、構造射 `blowupMap`。`IsProper (blowupMap k)`(Mathlib の `Proj` の固有性から)と、`k[x,y] → B` の単射性 `xyToBlow_injective`。未着手:`B₀ ≅ k[x,y]`(`Spec B₀ ≅ 𝔸²`)、`Proj` の閉点と集合論的モデル `blowupSet` の対応。
