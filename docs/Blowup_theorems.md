@@ -68,3 +68,4 @@
 * `BlowupClosure.lean`:二つのチャートの統合。`strict_eq_projClosure`:`k` 代数閉体・`f ≠ 0` で `X ∩ Z(strictEq f) = projClosure (φ⁻¹(Y∖0) ∩ X)`(𝔸² × ℙ¹ での射影的な閉包)。
 * `GradedQuotient.lean`:斉次イデアルによる商は次数付き環(Mathlib に未収録の一般的な構成)。
 * `BlowupScheme.lean`:`Scheme` としてのブローアップ `blowupScheme k = Proj (k[x,y,t,u]/(xu-ty))`(`(t,u)` に重み 1)、構造射 `blowupMap`。`IsProper (blowupMap k)`(Mathlib の `Proj` の固有性から)と、`k[x,y] → B` の単射性 `xyToBlow_injective`。さらに `B₀ ≃+* k[x,y]`(`blowB0Equiv`)、`Spec B₀ ≅ Spec k[x,y]`(`blowBaseIso`)、ブローアップ射 `blowupToAffine : Proj B ⟶ Spec k[x,y]`(固有)。未着手:`Proj` の閉点と集合論的モデル `blowupSet` の対応。
+* `BlowupPoints.lean`:`k` 点の対応。`blowupPoint : blowupSet k → ProjectiveSpectrum B`(`z ↦ homogeneousCore (ker (g ↦ g(P, rep L)))`、素かつ `t` か `u` を含まない)と、その単射性 `blowupPoint_injective`。未着手:像の特徴づけ(`x-c, y-c'` と `t,u` の 1 次式を含む斉次素イデアル全体との一致=全射性)。
