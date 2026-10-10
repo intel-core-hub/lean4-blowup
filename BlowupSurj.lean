@@ -185,7 +185,89 @@ lemma mem_E2 (𝔭 : ProjectiveSpectrum (blowGrading k)) (c c' : k)
   rw [key, map_add, map_add, map_mul, map_mul, mk_blowEq, add_zero]
   exact add_mem (Ideal.mul_mem_right _ _ hx') (Ideal.mul_mem_left _ _ hy)
 
-set_option maxHeartbeats 1600000 in
+/-- 行列式 `c a + b c' = 0`。 -/
+lemma det_eq_zero (𝔭 : ProjectiveSpectrum (blowGrading k)) (c c' a b : k)
+    (hx : mkB k (X 0 - C c) ∈ 𝔭.asHomogeneousIdeal.toIdeal)
+    (hy : mkB k (X 1 - C c') ∈ 𝔭.asHomogeneousIdeal.toIdeal)
+    (hl : mkB k (C a * X 2 + C b * X 3) ∈ 𝔭.asHomogeneousIdeal.toIdeal) :
+    c * a + b * c' = 0 := by
+  have hE := mem_E2 𝔭 c c' hx hy
+  by_contra hD
+  apply tu_not_both 𝔭
+  constructor
+  · refine mem_of_C_mul_mem hD ?_
+    have e : (C (c * a + b * c') * X 2 : MvPolynomial (Fin 4) k) =
+        C c * (C a * X 2 + C b * X 3) - C b * (C c * X 3 - C c' * X 2) := by
+      rw [C_add, C_mul, C_mul]; ring
+    rw [e, map_sub, map_mul, map_mul]
+    exact sub_mem (Ideal.mul_mem_left _ _ hl) (Ideal.mul_mem_left _ _ hE)
+  · refine mem_of_C_mul_mem hD ?_
+    have e : (C (c * a + b * c') * X 3 : MvPolynomial (Fin 4) k) =
+        C c' * (C a * X 2 + C b * X 3) + C a * (C c * X 3 - C c' * X 2) := by
+      rw [C_add, C_mul, C_mul]; ring
+    rw [e, map_add, map_mul, map_mul]
+    exact add_mem (Ideal.mul_mem_left _ _ hl) (Ideal.mul_mem_left _ _ hE)
+
+lemma exists_gen (𝔭 : ProjectiveSpectrum (blowGrading k)) (a b : k) (hab : a ≠ 0 ∨ b ≠ 0)
+    (hl : mkB k (C a * X 2 + C b * X 3) ∈ 𝔭.asHomogeneousIdeal.toIdeal) :
+    ∃ T : MvPolynomial (Fin 4) k,
+      mkB k (X 2 - C b * T) ∈ 𝔭.asHomogeneousIdeal.toIdeal ∧
+      mkB k (X 3 - C (-a) * T) ∈ 𝔭.asHomogeneousIdeal.toIdeal ∧
+      mkB k T ∉ 𝔭.asHomogeneousIdeal.toIdeal := by
+  by_cases hb : b = 0
+  · subst hb
+    have ha : a ≠ 0 := hab.resolve_right (not_not.mpr rfl)
+    have hna : -a ≠ 0 := neg_ne_zero.mpr ha
+    have hX2 : mkB k (X 2) ∈ 𝔭.asHomogeneousIdeal.toIdeal := by
+      refine mem_of_C_mul_mem ha ?_
+      simpa using hl
+    refine ⟨C (-a)⁻¹ * X 3, ?_, ?_, ?_⟩
+    · simpa using hX2
+    · have e : (X 3 - C (-a) * (C (-a)⁻¹ * X 3) : MvPolynomial (Fin 4) k) = 0 := by
+        rw [← mul_assoc, ← C_mul, mul_inv_cancel₀ hna, C_1, one_mul, sub_self]
+      rw [e, map_zero]
+      exact zero_mem _
+    · intro h
+      have hX3 := mem_of_C_mul_mem (inv_ne_zero hna) h
+      exact tu_not_both 𝔭 ⟨hX2, hX3⟩
+  · refine ⟨C b⁻¹ * X 2, ?_, ?_, ?_⟩
+    · have e : (X 2 - C b * (C b⁻¹ * X 2) : MvPolynomial (Fin 4) k) = 0 := by
+        rw [← mul_assoc, ← C_mul, mul_inv_cancel₀ hb, C_1, one_mul, sub_self]
+      rw [e, map_zero]
+      exact zero_mem _
+    · have e0 : (C b⁻¹ * C b : MvPolynomial (Fin 4) k) = 1 := by
+        rw [← C_mul, inv_mul_cancel₀ hb, C_1]
+      have e : (X 3 - C (-a) * (C b⁻¹ * X 2) : MvPolynomial (Fin 4) k) =
+          C b⁻¹ * (C a * X 2 + C b * X 3) := by
+        rw [C_neg]
+        linear_combination (-(X 3 : MvPolynomial (Fin 4) k)) * e0
+      rw [e, map_mul]
+      exact Ideal.mul_mem_left _ _ hl
+    · intro h
+      have hX2 := mem_of_C_mul_mem (inv_ne_zero hb) h
+      have hX3 : mkB k (C b * X 3) ∈ 𝔭.asHomogeneousIdeal.toIdeal := by
+        have : (C b * X 3 : MvPolynomial (Fin 4) k) =
+            (C a * X 2 + C b * X 3) - C a * X 2 := by ring
+        rw [this, map_sub, map_mul]
+        exact sub_mem hl (Ideal.mul_mem_left _ _ hX2)
+      exact tu_not_both 𝔭 ⟨hX2, mem_of_C_mul_mem hb hX3⟩
+
+lemma vec_ne_zero {a b : k} (hab : a ≠ 0 ∨ b ≠ 0) : (![b, -a] : Fin 2 → k) ≠ 0 := by
+  intro h
+  rcases hab with ha | hb
+  · apply ha
+    have := congrFun h 1
+    simpa using this
+  · apply hb
+    have := congrFun h 0
+    simpa using this
+
+lemma point_mem {c c' a b : k} (hab : a ≠ 0 ∨ b ≠ 0) (hD : c * a + b * c' = 0) :
+    ((![c, c'] : Fin 2 → k), mk k ![b, -a] (vec_ne_zero hab)) ∈ blowupSet k := by
+  rw [mem_blowupSet_iff (vec_ne_zero hab) rfl]
+  change c * (-a) = b * c'
+  linear_combination (-1 : k) * hD
+
 /-- **`x − c`, `y − c'`, `a t + b u` を含む `Proj B` の点は `blowupPoint z` の形**(`(a, b) ≠ 0`)。 -/
 theorem exists_blowupPoint_eq (𝔭 : ProjectiveSpectrum (blowGrading k)) (c c' a b : k)
     (hab : a ≠ 0 ∨ b ≠ 0)
@@ -193,78 +275,10 @@ theorem exists_blowupPoint_eq (𝔭 : ProjectiveSpectrum (blowGrading k)) (c c' 
     (hy : mkB k (X 1 - C c') ∈ 𝔭.asHomogeneousIdeal.toIdeal)
     (hl : mkB k (C a * X 2 + C b * X 3) ∈ 𝔭.asHomogeneousIdeal.toIdeal) :
     ∃ z : blowupSet k, blowupPoint k z = 𝔭 := by
-  have hE := mem_E2 𝔭 c c' hx hy
-  have hD : c * a + b * c' = 0 := by
-    by_contra hD
-    apply tu_not_both 𝔭
-    constructor
-    · refine mem_of_C_mul_mem hD ?_
-      have e : (C (c * a + b * c') * X 2 : MvPolynomial (Fin 4) k) =
-          C c * (C a * X 2 + C b * X 3) - C b * (C c * X 3 - C c' * X 2) := by
-        rw [C_add, C_mul, C_mul]; ring
-      rw [e, map_sub, map_mul, map_mul]
-      exact sub_mem (Ideal.mul_mem_left _ _ hl) (Ideal.mul_mem_left _ _ hE)
-    · refine mem_of_C_mul_mem hD ?_
-      have e : (C (c * a + b * c') * X 3 : MvPolynomial (Fin 4) k) =
-          C c' * (C a * X 2 + C b * X 3) + C a * (C c * X 3 - C c' * X 2) := by
-        rw [C_add, C_mul, C_mul]; ring
-      rw [e, map_add, map_mul, map_mul]
-      exact add_mem (Ideal.mul_mem_left _ _ hl) (Ideal.mul_mem_left _ _ hE)
-  have hv : (![b, -a] : Fin 2 → k) ≠ 0 := by
-    intro h
-    rcases hab with ha | hb
-    · apply ha
-      have := congrFun h 1
-      simpa using this
-    · apply hb
-      have := congrFun h 0
-      simpa using this
-  have hz : ((![c, c'] : Fin 2 → k), mk k ![b, -a] hv) ∈ blowupSet k := by
-    rw [mem_blowupSet_iff hv rfl]
-    change c * (-a) = b * c'
-    linear_combination (-1 : k) * hD
-  -- 生成元 `T`
-  obtain ⟨T, h2, h3, hT⟩ : ∃ T : MvPolynomial (Fin 4) k,
-      mkB k (X 2 - C b * T) ∈ 𝔭.asHomogeneousIdeal.toIdeal ∧
-      mkB k (X 3 - C (-a) * T) ∈ 𝔭.asHomogeneousIdeal.toIdeal ∧
-      mkB k T ∉ 𝔭.asHomogeneousIdeal.toIdeal := by
-    by_cases hb : b = 0
-    · subst hb
-      have ha : a ≠ 0 := hab.resolve_right (not_not.mpr rfl)
-      have hna : -a ≠ 0 := neg_ne_zero.mpr ha
-      have hX2 : mkB k (X 2) ∈ 𝔭.asHomogeneousIdeal.toIdeal := by
-        refine mem_of_C_mul_mem ha ?_
-        simpa using hl
-      refine ⟨C (-a)⁻¹ * X 3, ?_, ?_, ?_⟩
-      · simpa using hX2
-      · have e : (X 3 - C (-a) * (C (-a)⁻¹ * X 3) : MvPolynomial (Fin 4) k) = 0 := by
-          rw [← mul_assoc, ← C_mul, mul_inv_cancel₀ hna, C_1, one_mul, sub_self]
-        rw [e, map_zero]
-        exact zero_mem _
-      · intro h
-        have hX3 := mem_of_C_mul_mem (inv_ne_zero hna) h
-        exact tu_not_both 𝔭 ⟨hX2, hX3⟩
-    · refine ⟨C b⁻¹ * X 2, ?_, ?_, ?_⟩
-      · have e : (X 2 - C b * (C b⁻¹ * X 2) : MvPolynomial (Fin 4) k) = 0 := by
-          rw [← mul_assoc, ← C_mul, mul_inv_cancel₀ hb, C_1, one_mul, sub_self]
-        rw [e, map_zero]
-        exact zero_mem _
-      · have e0 : (C b⁻¹ * C b : MvPolynomial (Fin 4) k) = 1 := by
-          rw [← C_mul, inv_mul_cancel₀ hb, C_1]
-        have e : (X 3 - C (-a) * (C b⁻¹ * X 2) : MvPolynomial (Fin 4) k) =
-            C b⁻¹ * (C a * X 2 + C b * X 3) := by
-          rw [C_neg]
-          linear_combination (-(X 3 : MvPolynomial (Fin 4) k)) * e0
-        rw [e, map_mul]
-        exact Ideal.mul_mem_left _ _ hl
-      · intro h
-        have hX2 := mem_of_C_mul_mem (inv_ne_zero hb) h
-        have hX3 : mkB k (C b * X 3) ∈ 𝔭.asHomogeneousIdeal.toIdeal := by
-          have : (C b * X 3 : MvPolynomial (Fin 4) k) =
-              (C a * X 2 + C b * X 3) - C a * X 2 := by ring
-          rw [this, map_sub, map_mul]
-          exact sub_mem hl (Ideal.mul_mem_left _ _ hX2)
-        exact tu_not_both 𝔭 ⟨hX2, mem_of_C_mul_mem hb hX3⟩
+  have hD := det_eq_zero 𝔭 c c' a b hx hy hl
+  have hv := vec_ne_zero hab
+  have hz := point_mem hab hD
+  obtain ⟨T, h2, h3, hT⟩ := exists_gen 𝔭 a b hab hl
   have key : ∀ {n : ℕ} {g : MvPolynomial (Fin 4) k}, g ∈ bigrading k n →
       (mkB k g ∈ 𝔭.asHomogeneousIdeal.toIdeal ↔ MvPolynomial.eval ![c, c', b, -a] g = 0) :=
     fun hg => mem_iff_eval 𝔭 c c' a b T hx hy h2 h3 hT hg
@@ -275,9 +289,12 @@ theorem exists_blowupPoint_eq (𝔭 : ProjectiveSpectrum (blowGrading k)) (c c' 
   obtain ⟨p, hp, hpg⟩ := Submodule.mem_map.mp hg
   have hpg' : g = mkB k p := hpg.symm
   subst hpg'
-  change mkB k p ∈ pointIdeal k ⟨_, hz⟩ ↔ mkB k p ∈ 𝔭.asHomogeneousIdeal.toIdeal
-  rw [mem_pointIdeal_iff k _ ⟨n, mk_mem_blowGrading k hp⟩, blowEv_mk, key hp]
-  exact mem_projZeroSet_iff (isBihom_of_mem_bigrading hp) hv rfl
+  have h1 : mkB k p ∈ pointIdeal k ⟨_, hz⟩ ↔ evalPair ![c, c'] (mk k ![b, -a] hv).rep p = 0 := by
+    rw [mem_pointIdeal_iff k _ ⟨n, mk_mem_blowGrading k hp⟩, blowEv_mk]
+  have h2' : evalPair ![c, c'] (mk k ![b, -a] hv).rep p = 0 ↔
+      MvPolynomial.eval ![c, c', b, -a] p = 0 :=
+    mem_projZeroSet_iff (isBihom_of_mem_bigrading hp) hv rfl
+  exact h1.trans (h2'.trans (key hp).symm)
 end surj
 
 end Blowup
