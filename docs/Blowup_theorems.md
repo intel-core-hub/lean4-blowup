@@ -60,3 +60,8 @@
 * **ファイル構成**:`Blowup.lean`(多項式・`binom_resolution`・`theoremA`)と、
   それを `import` する `BlowupGeometry.lean`(集合論的モデル `X ⊂ 𝔸² × ℙ¹`、全単射・稠密性・既約性・
   strict transform = 閉包・接線の重複度の総和)。
+* `BlowupProjective.lean`:`X`・`E`・`φ⁻¹(Y)` を `(t,u)` に斉次な多項式の零点集合
+  (`projZeroSet`、`IsProjClosed`)として記述。
+* `BlowupStrict.lean`:strict transform の斉次方程式 `strictEq f`(`(t,u)` について `mult f` 次斉次)。
+  チャート `t`・`u` でそれぞれ `f̃`・`f̃'` に一致し、`X ∩ Z(strictEq f)` は各チャートで
+  `closure(φ⁻¹(Y∖0))` に一致する(`strictEq_mem_iff_chart_t/u`、`k` 代数閉体)。
