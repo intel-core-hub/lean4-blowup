@@ -152,6 +152,47 @@ theorem blowupPoint_injective : Function.Injective (blowupPoint k) := by
     rwa [mk_rep, mk_rep] at this
   exact Subtype.ext (Prod.ext hP hL)
 
+
+/-! ### 構造射との両立性(環のレベル)
+
+`Proj B` の点を `Spec k[x, y]` の点に送る写像 `basePoint` を `k[x, y] → B` による素イデアルの引き戻しで
+定義する(`blowupMap` の点での作用の環論的な記述)。`blowupPoint z` はちょうど点 `P` に落ちる。 -/
+
+/-- `Proj B` の点が落ちる `Spec k[x, y]` の点(イデアルの引き戻し)。 -/
+noncomputable def basePoint (x : ProjectiveSpectrum (blowGrading k)) :
+    PrimeSpectrum (MvPolynomial (Fin 2) k) :=
+  ⟨Ideal.comap (xyToBlow k) x.asHomogeneousIdeal.toIdeal,
+    haveI := x.isPrime
+    Ideal.comap_isPrime _ _⟩
+
+/-- **両立性**:`blowupPoint z` の落ちる点は `P`(`ker (eval P)`)。 -/
+theorem basePoint_blowupPoint (z : blowupSet k) :
+    (basePoint k (blowupPoint k z)).asIdeal = RingHom.ker (MvPolynomial.eval z.1.1) := by
+  ext f
+  have e : xyToBlow k f = Ideal.Quotient.mk (blowIdeal k) (pullXY f) := rfl
+  have hh : SetLike.IsHomogeneousElem (blowGrading k) (xyToBlow k f) :=
+    ⟨0, GradedQuotient.mem_grading (pull_mem_bigrading_zero k f)⟩
+  change xyToBlow k f ∈ pointIdeal k z ↔ f ∈ RingHom.ker (MvPolynomial.eval z.1.1)
+  rw [mem_pointIdeal_iff k z hh, RingHom.mem_ker, e, blowEv_mk, evalPair_pullXY]
+
+/-- 系:`blowupPoint z` が原点 `(0,0)` の上に落ちる ⇔ `P = 0`(例外因子 `E` の点)。 -/
+theorem basePoint_blowupPoint_eq_iff (z z' : blowupSet k) :
+    basePoint k (blowupPoint k z) = basePoint k (blowupPoint k z') ↔ z.1.1 = z'.1.1 := by
+  constructor
+  · intro h
+    have h' := congrArg PrimeSpectrum.asIdeal h
+    rw [basePoint_blowupPoint, basePoint_blowupPoint] at h'
+    have hx : ∀ (i : Fin 2), z.1.1 i = z'.1.1 i := fun i => by
+      have hmem : (X i - C (z.1.1 i) : MvPolynomial (Fin 2) k) ∈ RingHom.ker (MvPolynomial.eval z.1.1) := by
+        simp [RingHom.mem_ker]
+      rw [h'] at hmem
+      simp [RingHom.mem_ker] at hmem
+      exact hmem.symm
+    ext i
+    exact hx i
+  · intro h
+    apply PrimeSpectrum.ext
+    rw [basePoint_blowupPoint, basePoint_blowupPoint, h]
 end points
 
 end Blowup
