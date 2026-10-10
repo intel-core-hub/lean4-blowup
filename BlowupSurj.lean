@@ -289,11 +289,21 @@ theorem exists_blowupPoint_eq (𝔭 : ProjectiveSpectrum (blowGrading k)) (c c' 
   obtain ⟨p, hp, hpg⟩ := Submodule.mem_map.mp hg
   have hpg' : g = mkB k p := hpg.symm
   subst hpg'
-  have h1 : mkB k p ∈ pointIdeal k ⟨_, hz⟩ ↔ evalPair ![c, c'] (mk k ![b, -a] hv).rep p = 0 := by
+  have hv4 : (![(![c, c'] : Fin 2 → k) 0, (![c, c'] : Fin 2 → k) 1, (![b, -a] : Fin 2 → k) 0,
+      (![b, -a] : Fin 2 → k) 1] : Fin 4 → k) = ![c, c', b, -a] := by
+    ext i
+    fin_cases i <;> rfl
+  have e : evalPair (![c, c'] : Fin 2 → k) (![b, -a] : Fin 2 → k) p =
+      MvPolynomial.eval ![c, c', b, -a] p := by
+    unfold evalPair
+    rw [hv4]
+  have h1 : mkB k p ∈ pointIdeal k ⟨_, hz⟩ ↔
+      evalPair (![c, c'] : Fin 2 → k) (mk k ![b, -a] hv).rep p = 0 := by
     rw [mem_pointIdeal_iff k _ ⟨n, mk_mem_blowGrading k hp⟩, blowEv_mk]
-  have h2' : evalPair ![c, c'] (mk k ![b, -a] hv).rep p = 0 ↔
-      MvPolynomial.eval ![c, c', b, -a] p = 0 :=
+  have h2' : evalPair (![c, c'] : Fin 2 → k) (mk k ![b, -a] hv).rep p = 0 ↔
+      evalPair (![c, c'] : Fin 2 → k) (![b, -a] : Fin 2 → k) p = 0 :=
     mem_projZeroSet_iff (isBihom_of_mem_bigrading hp) hv rfl
+  rw [e] at h2'
   exact h1.trans (h2'.trans (key hp).symm)
 end surj
 
