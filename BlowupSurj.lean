@@ -264,7 +264,9 @@ theorem exists_blowupPoint_eq (𝔭 : ProjectiveSpectrum (blowGrading k)) (c c' 
           rw [this, map_sub, map_mul]
           exact sub_mem hl (Ideal.mul_mem_left _ _ hX2)
         exact tu_not_both 𝔭 ⟨hX2, mem_of_C_mul_mem hb hX3⟩
-  have key := mem_iff_eval 𝔭 c c' a b T hx hy h2 h3 hT
+  have key : ∀ {n : ℕ} {g : MvPolynomial (Fin 4) k}, g ∈ bigrading k n →
+      (mkB k g ∈ 𝔭.asHomogeneousIdeal.toIdeal ↔ MvPolynomial.eval ![c, c', b, -a] g = 0) :=
+    fun hg => mem_iff_eval 𝔭 c c' a b T hx hy h2 h3 hT hg
   refine ⟨⟨_, hz⟩, ?_⟩
   apply ProjectiveSpectrum.ext
   apply homIdeal_ext
