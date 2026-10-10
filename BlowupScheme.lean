@@ -77,7 +77,7 @@ open Classical in
 instance blowRing_finiteType : Algebra.FiniteType (blowGrading k 0) (BlowRing k) := by
   refine ⟨⟨{Ideal.Quotient.mk (blowIdeal k) (X 2), Ideal.Quotient.mk (blowIdeal k) (X 3)}, ?_⟩⟩
   rw [eq_top_iff]
-  intro b _
+  rintro b -
   obtain ⟨p, rfl⟩ := Ideal.Quotient.mk_surjective b
   have h0 : ∀ q : MvPolynomial (Fin 4) k, q ∈ bigrading k 0 →
       Ideal.Quotient.mk (blowIdeal k) q ∈ Algebra.adjoin (blowGrading k 0)
@@ -131,8 +131,12 @@ lemma blowSpecialize_comp (f : MvPolynomial (Fin 2) k) :
     apply MvPolynomial.algHom_ext
     intro i
     fin_cases i
-    · exact (aeval_X _ _).trans rfl |>.trans (by simp [blowSpecialize])
-    · exact (aeval_X _ _).trans rfl |>.trans (by simp [blowSpecialize])
+    · rw [AlgHom.comp_apply, aeval_X]
+      change blowSpecialize k (X 0) = X 0
+      exact aeval_X _ _
+    · rw [AlgHom.comp_apply, aeval_X]
+      change blowSpecialize k (X 1) = X 1
+      exact aeval_X _ _
   exact congrArg (fun φ => φ f) h
 
 /-- **`k[x, y] → B` は単射**(`B₀ ⊇ k[x, y]`;ブローアップは `𝔸²` の上にある)。 -/
