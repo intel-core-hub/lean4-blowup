@@ -69,6 +69,80 @@ noncomputable def blowupScheme : Scheme.{u} := Proj (blowGrading k)
 noncomputable def blowupMap : blowupScheme k ⟶ Spec (CommRingCat.of (blowGrading k 0)) :=
   Proj.toSpecZero (blowGrading k)
 
+
+/-! ### 固有性と `k[x, y]` からの単射 -/
+
+open Classical in
+/-- `B` は `B₀` 上、`t, u` で生成される(有限型)。 -/
+instance blowRing_finiteType : Algebra.FiniteType (blowGrading k 0) (BlowRing k) := by
+  refine ⟨⟨{Ideal.Quotient.mk (blowIdeal k) (X 2), Ideal.Quotient.mk (blowIdeal k) (X 3)}, ?_⟩⟩
+  rw [eq_top_iff]
+  intro b _
+  obtain ⟨p, rfl⟩ := Ideal.Quotient.mk_surjective b
+  have h0 : ∀ q : MvPolynomial (Fin 4) k, q ∈ bigrading k 0 →
+      Ideal.Quotient.mk (blowIdeal k) q ∈ Algebra.adjoin (blowGrading k 0)
+        (({Ideal.Quotient.mk (blowIdeal k) (X 2), Ideal.Quotient.mk (blowIdeal k) (X 3)} :
+          Finset (BlowRing k)) : Set (BlowRing k)) := fun q hq =>
+    Subalgebra.algebraMap_mem _ (⟨Ideal.Quotient.mk (blowIdeal k) q, GradedQuotient.mem_grading hq⟩ :
+      blowGrading k 0)
+  induction p using MvPolynomial.induction_on with
+  | C c =>
+    exact h0 _ ((mem_weightedHomogeneousSubmodule _ _ _ _).mpr (isWeightedHomogeneous_C wt c))
+  | add a b ha hb =>
+    rw [map_add]
+    exact add_mem ha hb
+  | mul_X a i ha =>
+    rw [map_mul]
+    refine mul_mem ha ?_
+    fin_cases i
+    · exact h0 _ ((mem_weightedHomogeneousSubmodule _ _ _ _).mpr
+        (isWeightedHomogeneous_X k wt 0 : IsWeightedHomogeneous wt (X 0 : MvPolynomial (Fin 4) k) 0))
+    · exact h0 _ ((mem_weightedHomogeneousSubmodule _ _ _ _).mpr
+        (isWeightedHomogeneous_X k wt 1 : IsWeightedHomogeneous wt (X 1 : MvPolynomial (Fin 4) k) 0))
+    · exact Algebra.subset_adjoin (by simp)
+    · exact Algebra.subset_adjoin (by simp)
+
+/-- **ブローアップは `Spec B₀` 上固有**(`Mathlib` の `Proj` の固有性から)。 -/
+instance blowupMap_isProper : IsProper (blowupMap k) :=
+  inferInstanceAs (IsProper (Proj.toSpecZero (blowGrading k)))
+
+/-- `k[x, y] → B`。 -/
+noncomputable def xyToBlow : MvPolynomial (Fin 2) k →ₐ[k] BlowRing k :=
+  (Ideal.Quotient.mkₐ k (blowIdeal k)).comp
+    (MvPolynomial.aeval (![X 0, X 1] : Fin 2 → MvPolynomial (Fin 4) k))
+
+/-- `t ↦ x`、`u ↦ y` の代入。`(x u − t y)` を消す。 -/
+noncomputable def blowSpecialize : MvPolynomial (Fin 4) k →ₐ[k] MvPolynomial (Fin 2) k :=
+  MvPolynomial.aeval (![X 0, X 1, X 0, X 1] : Fin 4 → MvPolynomial (Fin 2) k)
+
+lemma blowSpecialize_blowEq : blowSpecialize k (blowEq k) = 0 := by
+  rw [blowEq, blowSpecialize, map_sub, map_mul, map_mul, aeval_X, aeval_X, aeval_X, aeval_X]
+  exact sub_self _
+
+lemma blowSpecialize_blowIdeal {z : MvPolynomial (Fin 4) k} (hz : z ∈ blowIdeal k) :
+    blowSpecialize k z = 0 := by
+  obtain ⟨c, rfl⟩ := Ideal.mem_span_singleton'.mp hz
+  rw [map_mul, blowSpecialize_blowEq, mul_zero]
+
+lemma blowSpecialize_comp (f : MvPolynomial (Fin 2) k) :
+    blowSpecialize k (MvPolynomial.aeval (![X 0, X 1] : Fin 2 → MvPolynomial (Fin 4) k) f) = f := by
+  have h : (blowSpecialize k).comp
+      (MvPolynomial.aeval (![X 0, X 1] : Fin 2 → MvPolynomial (Fin 4) k)) = AlgHom.id k _ := by
+    apply MvPolynomial.algHom_ext
+    intro i
+    fin_cases i
+    · exact (aeval_X _ _).trans rfl |>.trans (by simp [blowSpecialize])
+    · exact (aeval_X _ _).trans rfl |>.trans (by simp [blowSpecialize])
+  exact congrArg (fun φ => φ f) h
+
+/-- **`k[x, y] → B` は単射**(`B₀ ⊇ k[x, y]`;ブローアップは `𝔸²` の上にある)。 -/
+theorem xyToBlow_injective : Function.Injective (xyToBlow k) := by
+  rw [injective_iff_map_eq_zero]
+  intro f hf
+  have hmem : MvPolynomial.aeval (![X 0, X 1] : Fin 2 → MvPolynomial (Fin 4) k) f ∈ blowIdeal k :=
+    Ideal.Quotient.eq_zero_iff_mem.mp hf
+  have := blowSpecialize_blowIdeal k hmem
+  rwa [blowSpecialize_comp] at this
 end scheme
 
 end Blowup
